@@ -47,7 +47,7 @@
 <body>
   <div id="time">--:--:--</div>
   <div id="date">Loading date...</div>
-  <div id="location">Loading location...</div>
+<!--   <div id="location">Loading location...</div> -->
   <button id="pipButton">📺 Show in PiP</button>
 
   <canvas id="clockCanvas" width="400" height="200"></canvas>
@@ -88,8 +88,8 @@
       ctx.font = "22px Arial";
       ctx.fillText(dateStr, canvas.width / 2, 115);
 
-      ctx.font = "20px Arial";
-      ctx.fillText(currentLocation, canvas.width / 2, 160);
+      // ctx.font = "20px Arial";
+      // ctx.fillText(currentLocation, canvas.width / 2, 160);
     }
 
     function updateDisplay() {
@@ -104,7 +104,7 @@
 
       document.getElementById("time").textContent = timeStr;
       document.getElementById("date").textContent = dateStr;
-      document.getElementById("location").textContent = currentLocation;
+      // document.getElementById("location").textContent = currentLocation;
 
       drawCanvasContent();
     }
