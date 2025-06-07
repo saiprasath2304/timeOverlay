@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>SSSMC test</title>
+  <style>
+    body {
+      background: black;
+      color: white;
+      font-family: Arial, sans-serif;
+      text-align: center;
+      margin: 0;
+      padding-top: 40px;
+    }
+
+    #time {
+      font-size: 3rem;
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+
+    #date {
+      font-size: 1.5rem;
+      margin-bottom: 10px;
+    }
+
+    #location {
+      font-size: 1.2rem;
+      opacity: 0.8;
+      margin-bottom: 20px;
+    }
+
+    #pipButton {
+      padding: 10px 20px;
+      background: #333;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 1rem;
+    }
+
+    canvas, video {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <div id="time">--:--:--</div>
+  <div id="date">Loading date...</div>
+  <div id="location">Loading location...</div>
+  <button id="pipButton">📺 Show in PiP</button>
+
+  <canvas id="clockCanvas" width="400" height="200"></canvas>
+  <video id="pipVideo" autoplay muted playsinline></video>
+
+  <script>
+    const canvas = document.getElementById("clockCanvas");
+    const ctx = canvas.getContext("2d");
+    const pipVideo = document.getElementById("pipVideo");
+    const pipButton = document.getElementById("pipButton");
+
+    let currentLocation = "Loading location...";
+
+
+    const stream = canvas.captureStream(30); //30 FPS to ensure live updates
+    pipVideo.srcObject = stream;
+    pipVideo.play(); //forcing playback
+
+    //drawing clock content repeatedly
+    function drawCanvasContent() {
+      const now = new Date();
+      const timeStr = now.toLocaleTimeString();
+      const dateStr = now.toLocaleDateString(undefined, {
+        weekday: "long",
+        year: "numeric",
+        month: "long",
+        day: "numeric"
+      });
+
+      ctx.fillStyle = "black";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      ctx.fillStyle = "white";
+      ctx.textAlign = "center";
+      ctx.font = "38px Arial";
+      ctx.fillText(timeStr, canvas.width / 2, 70);
+
+      ctx.font = "22px Arial";
+      ctx.fillText(dateStr, canvas.width / 2, 115);
+
+      ctx.font = "20px Arial";
+      ctx.fillText(currentLocation, canvas.width / 2, 160);
+    }
+
+    function updateDisplay() {
+      const now = new Date();
+      const timeStr = now.toLocaleTimeString();
+      const dateStr = now.toLocaleDateString(undefined, {
+        weekday: "long",
+        year: "numeric",
+        month: "long",
+        day: "numeric"
+      });
+
+      document.getElementById("time").textContent = timeStr;
+      document.getElementById("date").textContent = dateStr;
+      document.getElementById("location").textContent = currentLocation;
+
+      drawCanvasContent();
+    }
+
+    setInterval(updateDisplay, 1000);
+    updateDisplay();
+
+    fetch("https://ipapi.co/json")
+      .then(res => res.json())
+      .then(data => {
+        currentLocation = `${data.city}, ${data.region}, ${data.country_name}`;
+        updateDisplay();
+      })
+      .catch(() => {
+        currentLocation = "Location unavailable";
+        updateDisplay();
+      });
+
+    pipButton.onclick = async () => {
+      try {
+        await pipVideo.requestPictureInPicture();
+      } catch (err) {
+        alert("Picture-in-Picture failed: " + err);
+      }
+    };
+  </script>
+</body>
+</html>
